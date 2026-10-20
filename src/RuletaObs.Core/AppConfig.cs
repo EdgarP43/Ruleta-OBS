@@ -17,6 +17,9 @@ public sealed class AppConfig
     public string? CelebrationMediaFileName { get; set; }
     public string CelebrationMediaVersion { get; set; } = string.Empty;
     public string CelebrationText { get; set; } = "¡{usuario} canjeó una tirada!";
+    public string? SoundMediaFileName { get; set; }
+    public string SoundMediaVersion { get; set; } = string.Empty;
+    public int SoundVolume { get; set; } = 80;
     public ConversionRules Rules { get; set; } = new();
     public List<Prize> Prizes { get; set; } = DefaultPrizes();
 

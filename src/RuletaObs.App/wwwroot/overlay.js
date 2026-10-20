@@ -11,7 +11,7 @@ let animationState='idle'; // idle | spinning | showing
 let activeSpinId=null;
 const queuedSpins=[];const queuedSpinIds=new Set();const displayedEntryIds=new Set();
 let loadInFlight=false,loadDirty=false;
-let celebrationText='',celebrationMediaUrl=null;
+let celebrationText='',celebrationMediaUrl=null,customSoundUrl=null,soundVolume=80;
 const wheelBase=document.createElement('canvas');wheelBase.width=900;wheelBase.height=900;let wheelBaseKey='';
 
 function clearHideTimer(){if(hideTimer)clearTimeout(hideTimer);hideTimer=null;hideForKey=null;}
@@ -64,7 +64,7 @@ async function loadQueue(){
   finally{loadInFlight=false;}
 }
 async function loadQueueOnce(){
-  const r=await fetch('/api/queue');const q=await r.json();soundEnabled=q.soundEnabled;celebrationText=q.celebrationText||'';celebrationMediaUrl=q.celebrationMediaUrl||null;
+  const r=await fetch('/api/queue');const q=await r.json();soundEnabled=q.soundEnabled;celebrationText=q.celebrationText||'';celebrationMediaUrl=q.celebrationMediaUrl||null;customSoundUrl=q.soundUrl||null;soundVolume=q.soundVolume??80;
   if(animationState!=='spinning')prizes=q.prizes.filter(p=>p.isEnabled&&p.weight>0);
   $('queue').innerHTML=q.summary.length?q.summary.map(x=>`<div class="person">${x.avatarUrl?`<img src="${x.avatarUrl}">`:'<img alt="">'}<div class="n"><strong>${escapeHtml(x.viewerDisplayName)}</strong><br><small>${label(x.lastSource)}</small></div><span class="badge">x${x.pendingSpins+x.awaitingConfirmation}</span></div>`).join(''):'<div class="empty">Sin tiradas pendientes</div>';
   if(q.current){
@@ -99,7 +99,8 @@ function draw(){
   ctx.beginPath();ctx.arc(450,450,105,0,Math.PI*2);ctx.fillStyle='#171321';ctx.fill();ctx.lineWidth=8;ctx.strokeStyle='#fff';ctx.stroke();
   ctx.fillStyle='#fff';ctx.font='bold 30px Segoe UI';ctx.textAlign='center';ctx.fillText('RULETA',450,460);
 }
-function beep(){if(!soundEnabled)return;try{const a=new(window.AudioContext||window.webkitAudioContext)();const o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=880;g.gain.setValueAtTime(.12,a.currentTime);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+.35);o.start();o.stop(a.currentTime+.36);}catch{}}
+function beep(){if(!soundEnabled)return;if(customSoundUrl){try{const audio=new Audio(customSoundUrl);audio.volume=Math.min(1,Math.max(0,soundVolume/100));audio.play().catch(()=>synthBeep());return;}catch{}}synthBeep();}
+function synthBeep(){try{const a=new(window.AudioContext||window.webkitAudioContext)();const o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=880;g.gain.setValueAtTime(.12,a.currentTime);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+.35);o.start();o.stop(a.currentTime+.36);}catch{}}
 function showAlert(d){
   lastActivityAt=Date.now();showQueue();
   if(alertTimer)clearTimeout(alertTimer);

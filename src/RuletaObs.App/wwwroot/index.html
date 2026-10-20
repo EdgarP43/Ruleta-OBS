@@ -37,6 +37,14 @@
 <div class="row" style="margin-top:10px"><img id="mediaPreview" alt="" style="max-width:260px;max-height:160px;border-radius:12px;display:none"><button id="removeMedia" class="danger" type="button">Quitar imagen</button></div>
 <label>Texto</label><input id="celebrationText" value="¡{usuario} canjeó una tirada!">
 <p id="mediaMsg" class="ok"></p>
+<h3>Sonido personalizado de alerta/ruleta</h3>
+<p class="muted">Si no subes ninguno, suena el pitido por defecto.</p>
+<label>Archivo de sonido (MP3, WAV, OGG o M4A, máximo 5 MB)</label>
+<input id="soundFile" type="file" accept="audio/mpeg,audio/wav,audio/ogg,audio/mp4,.m4a">
+<label>Volumen: <span id="soundVolumeLabel">80</span>%</label>
+<input id="soundVolume" type="range" min="0" max="100" value="80">
+<div class="row" style="margin-top:10px"><button id="testSound" class="secondary" type="button">Probar sonido</button><button id="removeSound" class="danger" type="button">Quitar sonido</button></div>
+<p id="soundMsg" class="ok"></p>
 <h3>Premios</h3><div id="prizes"></div>
 <button id="addPrize" class="secondary">Agregar premio</button>
 <div class="row" style="margin-top:14px"><button id="save">Guardar configuración</button></div>

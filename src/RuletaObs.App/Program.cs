@@ -209,6 +209,59 @@ app.MapGet("/media/current", (HttpRequest http) =>
     return Results.File(path, contentType);
 });
 
+app.MapPost("/api/sound", async (MediaUploadRequest request, HttpRequest http) =>
+{
+    if (!HasLocalKey(http)) return ApiResults.Error("Clave local inválida.", StatusCodes.Status403Forbidden);
+    var extension = Path.GetExtension(request.FileName).ToLowerInvariant();
+    if (extension is not (".mp3" or ".wav" or ".ogg" or ".m4a")) return ApiResults.Error("Formato no soportado. Usa MP3, WAV, OGG o M4A.");
+    try
+    {
+        var raw = request.ContentBase64.Contains(',') ? request.ContentBase64[(request.ContentBase64.IndexOf(',') + 1)..] : request.ContentBase64;
+        var bytes = Convert.FromBase64String(raw);
+        if (bytes.Length == 0 || bytes.Length > 5 * 1024 * 1024) return ApiResults.Error("El sonido debe pesar máximo 5 MB.");
+        var mediaDirectory = Path.Combine(dataDirectory, "media");
+        Directory.CreateDirectory(mediaDirectory);
+        foreach (var old in Directory.GetFiles(mediaDirectory, "sound.*")) File.Delete(old);
+        var fileName = "sound" + extension;
+        await File.WriteAllBytesAsync(Path.Combine(mediaDirectory, fileName), bytes, http.HttpContext.RequestAborted);
+        config.Current.SoundMediaFileName = fileName;
+        config.Current.SoundMediaVersion = Guid.NewGuid().ToString("N");
+        await config.SaveAsync(config.Current);
+        bus.Publish("config", new { updatedAt = DateTimeOffset.UtcNow });
+        return Results.Json(new { ok = true, url = $"/sound/current?key={config.Current.OverlayKey}&v={config.Current.SoundMediaVersion}" });
+    }
+    catch (FormatException) { return ApiResults.Error("El archivo de sonido no se pudo leer."); }
+});
+
+app.MapDelete("/api/sound", async (HttpRequest http) =>
+{
+    if (!HasLocalKey(http)) return ApiResults.Error("Clave local inválida.", StatusCodes.Status403Forbidden);
+    var mediaDirectory = Path.Combine(dataDirectory, "media");
+    if (Directory.Exists(mediaDirectory)) foreach (var old in Directory.GetFiles(mediaDirectory, "sound.*")) File.Delete(old);
+    config.Current.SoundMediaFileName = null;
+    config.Current.SoundMediaVersion = Guid.NewGuid().ToString("N");
+    await config.SaveAsync(config.Current);
+    bus.Publish("config", new { updatedAt = DateTimeOffset.UtcNow });
+    return Results.Ok(new { ok = true });
+});
+
+app.MapGet("/sound/current", (HttpRequest http) =>
+{
+    if (http.Query["key"].ToString() != config.Current.OverlayKey || string.IsNullOrWhiteSpace(config.Current.SoundMediaFileName))
+        return Results.NotFound();
+    var path = Path.Combine(dataDirectory, "media", Path.GetFileName(config.Current.SoundMediaFileName));
+    if (!File.Exists(path)) return Results.NotFound();
+    var contentType = Path.GetExtension(path).ToLowerInvariant() switch
+    {
+        ".mp3" => "audio/mpeg",
+        ".wav" => "audio/wav",
+        ".ogg" => "audio/ogg",
+        ".m4a" => "audio/mp4",
+        _ => "application/octet-stream"
+    };
+    return Results.File(path, contentType);
+});
+
 app.MapGet("/api/queue", async () =>
 {
     var all = await repo.ListAsync(null, 2000);
@@ -225,7 +278,11 @@ app.MapGet("/api/queue", async () =>
         celebrationText = config.Current.CelebrationText,
         celebrationMediaUrl = string.IsNullOrWhiteSpace(config.Current.CelebrationMediaFileName)
             ? null
-            : $"/media/current?key={config.Current.OverlayKey}&v={config.Current.CelebrationMediaVersion}"
+            : $"/media/current?key={config.Current.OverlayKey}&v={config.Current.CelebrationMediaVersion}",
+        soundUrl = string.IsNullOrWhiteSpace(config.Current.SoundMediaFileName)
+            ? null
+            : $"/sound/current?key={config.Current.OverlayKey}&v={config.Current.SoundMediaVersion}",
+        soundVolume = Math.Clamp(config.Current.SoundVolume, 0, 100)
     });
 });
 
