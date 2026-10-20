@@ -4,6 +4,14 @@ Ruleta local y gratuita para Twitch: escucha canjes de puntos del canal y bits, 
 
 Todo corre desde un único `RuletaObs.exe` en la PC del creador: sin servidor en la nube, sin mensualidades y sin instalar .NET, Node ni bases de datos.
 
+## Descargar
+
+- [Descargar instalador para Windows (recomendado)](https://github.com/EdgarP43/Ruleta-OBS/releases/latest/download/RuletaObs-Setup.exe)
+- [Descargar `RuletaObs.exe` portable](https://github.com/EdgarP43/Ruleta-OBS/releases/latest/download/RuletaObs.exe)
+- [Ver todas las versiones publicadas](https://github.com/EdgarP43/Ruleta-OBS/releases)
+
+Los ejecutables **no se guardan dentro del código del repositorio**: GitHub los publica como archivos adjuntos en **Releases**. Cada vez que se crea un tag `v*`, el pipeline compila automáticamente y adjunta `RuletaObs.exe` y `RuletaObs-Setup.exe` a esa versión. Si acabas de crear un tag, espera a que la acción **Release** termine en verde para ver los archivos.
+
 ## Para creadores: instalación en 3 minutos
 
 1. Descarga `RuletaObs-Setup.exe` desde Releases (o `RuletaObs.exe` portable y ábrelo directo).
