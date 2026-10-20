@@ -38,6 +38,7 @@ builder.Services.AddSingleton<AuthFlowState>();
 builder.Services.AddSingleton<TwitchHelixClient>(sp => new TwitchHelixClient(
     ct => sp.GetRequiredService<TokenManager>().GetValidTokenAsync(ct),
     () => sp.GetRequiredService<ConfigStore>().Current.TwitchClientId));
+builder.Services.AddSingleton<SpinService>();
 builder.Services.AddSingleton<TwitchEventProcessor>();
 builder.Services.AddHostedService<TwitchWorker>();
 
@@ -50,6 +51,7 @@ var tokens = app.Services.GetRequiredService<TokenManager>();
 var auth = app.Services.GetRequiredService<TwitchAuthClient>();
 var helix = app.Services.GetRequiredService<TwitchHelixClient>();
 var authFlow = app.Services.GetRequiredService<AuthFlowState>();
+var spinService = app.Services.GetRequiredService<SpinService>();
 
 string? GetEmbeddedText(string fileName)
 {
@@ -313,6 +315,7 @@ app.MapPost("/api/queue/simulate", async (SimulateRequest request, HttpRequest h
         request.Amount, config.Current.PointsRewardId, config.Current.PointsRewardTitle, null, spins, http.HttpContext.RequestAborted);
     if (inserted) bus.Publish("alert", new { viewer = name, source = source.ToString(), amount = request.Amount, spins, message = spins == 1 ? "agregó 1 tirada de prueba" : $"agregó {spins} tiradas de prueba" });
     await PublishQueueAsync();
+    if (inserted) await spinService.TryAutoSpinAsync(http.HttpContext.RequestAborted);
     return Results.Json(new { ok = inserted, spins });
 });
 
@@ -320,16 +323,10 @@ app.MapPost("/api/spin/next", async (HttpRequest http) =>
 {
     if (!HasLocalKey(http)) return ApiResults.Error("Clave local inválida.", StatusCodes.Status403Forbidden);
     if (await repo.GetCurrentAwaitingAsync(http.HttpContext.RequestAborted) is not null) return ApiResults.Error("Ya hay una tirada esperando confirmación.");
-    var next = await repo.GetNextPendingAsync(http.HttpContext.RequestAborted);
-    if (next is null) return ApiResults.Error("No hay tiradas pendientes.");
-    Prize prize;
-    try { prize = new WeightedPrizePicker().Pick(config.Current.Prizes); }
+    SpinResult? payload;
+    try { payload = await spinService.TrySpinNextAsync(http.HttpContext.RequestAborted); }
     catch (Exception ex) { return ApiResults.Error(ex.Message); }
-    next.MarkSpun(prize.Name, DateTimeOffset.UtcNow);
-    await repo.UpdateAsync(next, http.HttpContext.RequestAborted);
-    var payload = new { entry = next, prize, prizes = config.Current.Prizes.Where(p => p.IsEnabled && p.Weight > 0).ToList() };
-    bus.Publish("spin", payload);
-    await PublishQueueAsync();
+    if (payload is null) return ApiResults.Error("No hay tiradas pendientes.");
     return Results.Json(payload);
 });
 
@@ -343,6 +340,7 @@ app.MapPost("/api/spin/confirm", async (HttpRequest http) =>
     var synced = await TrySyncRedemptionAsync(current, http.HttpContext.RequestAborted);
     bus.Publish("closed", new { entry = current, action = "completed", synced });
     await PublishQueueAsync();
+    await spinService.TryAutoSpinAsync(http.HttpContext.RequestAborted);
     return Results.Json(new { ok = true, entry = current, twitchSynced = synced });
 });
 
@@ -356,6 +354,7 @@ app.MapPost("/api/spin/cancel", async (HttpRequest http) =>
     var synced = await TrySyncRedemptionAsync(current, http.HttpContext.RequestAborted);
     bus.Publish("closed", new { entry = current, action = "cancelled", synced });
     await PublishQueueAsync();
+    await spinService.TryAutoSpinAsync(http.HttpContext.RequestAborted);
     return Results.Json(new { ok = true, entry = current, twitchSynced = synced });
 });
 

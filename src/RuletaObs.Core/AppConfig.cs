@@ -13,6 +13,7 @@ public sealed class AppConfig
     public bool PointsRewardManageable { get; set; }
     public string OverlayKey { get; set; } = Convert.ToHexString(Guid.NewGuid().ToByteArray()).ToLowerInvariant();
     public bool SoundEnabled { get; set; } = true;
+    public bool AutoSpinOnRedeem { get; set; } = true;
     public ConversionRules Rules { get; set; } = new();
     public List<Prize> Prizes { get; set; } = DefaultPrizes();
 

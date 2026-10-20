@@ -35,14 +35,16 @@ public sealed class TwitchEventProcessor
     private readonly EventBus _bus;
     private readonly TwitchHelixClient _helix;
     private readonly TwitchRuntimeState _state;
+    private readonly SpinService _spin;
 
-    public TwitchEventProcessor(SpinRepository repo, ConfigStore config, EventBus bus, TwitchHelixClient helix, TwitchRuntimeState state)
+    public TwitchEventProcessor(SpinRepository repo, ConfigStore config, EventBus bus, TwitchHelixClient helix, TwitchRuntimeState state, SpinService spin)
     {
         _repo = repo;
         _config = config;
         _bus = bus;
         _helix = helix;
         _state = state;
+        _spin = spin;
     }
 
     public async Task ProcessAsync(TwitchSpinEvent ev, CancellationToken cancellationToken = default)
@@ -98,6 +100,7 @@ public sealed class TwitchEventProcessor
             message = spins == 1 ? "agregó 1 tirada a la cola" : $"agregó {spins} tiradas a la cola"
         });
         _bus.Publish("queue", new { updatedAt = DateTimeOffset.UtcNow });
+        await _spin.TryAutoSpinAsync(cancellationToken);
     }
 }
 
