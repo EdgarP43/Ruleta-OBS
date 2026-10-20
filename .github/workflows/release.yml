@@ -1,0 +1,51 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Integrar Client ID público de Twitch (si está configurado)
+        shell: pwsh
+        env:
+          TWITCH_CLIENT_ID: ${{ vars.TWITCH_CLIENT_ID }}
+        run: |
+          if ($env:TWITCH_CLIENT_ID) {
+            $content = @"
+          namespace RuletaObs.App;
+          internal static class BuiltInTwitchClientId
+          {
+              public const string Value = "$env:TWITCH_CLIENT_ID";
+          }
+          "@
+            Set-Content -Path "src/RuletaObs.App/BuiltInTwitchClientId.cs" -Value $content -Encoding utf8
+          }
+      - run: dotnet restore RuletaObs.slnx
+      - run: dotnet test RuletaObs.slnx -c Release
+      - name: Publicar exe único
+        run: dotnet publish src/RuletaObs.App/RuletaObs.App.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:DebugType=None -o artifacts/publish
+      - name: Instalar Inno Setup
+        run: choco install innosetup -y --no-progress
+      - name: Compilar instalador
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force artifacts/installer | Out-Null
+          $iscc = @("C:\Program Files (x86)\Inno Setup 6\ISCC.exe", "C:\Program Files\Inno Setup 6\ISCC.exe", "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe") | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $iscc) { throw "No se encontró ISCC.exe" }
+          & $iscc installer/RuletaObs.iss
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/publish/RuletaObs.exe
+            artifacts/installer/*.exe
+          generate_release_notes: true

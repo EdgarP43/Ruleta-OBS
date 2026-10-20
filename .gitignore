@@ -1,0 +1,13 @@
+bin/
+obj/
+publish/
+artifacts/
+*.user
+*.suo
+.vs/
+.idea/
+TestResults/
+*.db
+*.db-shm
+*.db-wal
+src/RuletaObs.App/BuiltInTwitchClientId.g.cs

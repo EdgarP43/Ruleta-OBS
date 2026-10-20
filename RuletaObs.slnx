@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="src/RuletaObs.Core/RuletaObs.Core.csproj" />
+  <Project Path="src/RuletaObs.Twitch/RuletaObs.Twitch.csproj" />
+  <Project Path="src/RuletaObs.App/RuletaObs.App.csproj" />
+  <Project Path="tests/RuletaObs.Tests/RuletaObs.Tests.csproj" />
+</Solution>

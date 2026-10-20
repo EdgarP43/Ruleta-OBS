@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ruleta OBS - Configuración</title><link rel="stylesheet" href="/assets/app.css"></head>
+<body><main>
+<h1>Ruleta OBS</h1><p class="muted">Configura todo una vez. Después solo abre OBS y usa el panel del creador.</p>
+<div class="card"><h2>Estado</h2><div id="status">Cargando...</div><pre id="logs"></pre></div>
+
+<section class="card"><h2>1. Conectar Twitch</h2>
+<p class="muted">Pulsa conectar, inicia sesión en Twitch y autoriza. No necesitas entrar a Twitch Dev.</p>
+<label>Client ID público (solo si el desarrollador no lo integró)</label>
+<input id="clientId" placeholder="Client ID de la app pública de Twitch">
+<div class="row" style="margin-top:12px"><button id="connect">Conectar mi canal</button><button id="disconnect" class="danger">Desconectar</button></div>
+<p id="deviceHelp" class="warn"></p></section>
+
+<section class="card"><h2>2. Recompensa de puntos</h2>
+<p class="muted">Puedes crear una recompensa nueva o asignar una que ya exista en tu canal.</p>
+<div class="row"><button id="loadRewards" class="secondary">Ver recompensas de mi canal</button></div>
+<div id="rewards"></div>
+<h3>Crear recompensa nueva</h3>
+<label>Nombre</label><input id="rewardTitle" value="Ruleta">
+<label>Costo en puntos</label><input id="rewardCost" type="number" min="1" value="1000">
+<label>Texto para el espectador</label><input id="rewardPrompt" value="Canjea y agrega una tirada a la ruleta">
+<div class="row" style="margin-top:12px"><button id="createReward">Crear y asignar</button></div>
+<p id="rewardWarning" class="warn"></p></section>
+
+<section class="card"><h2>3. Reglas y premios</h2>
+<div class="grid">
+<div><label>Tiradas por canje de puntos</label><input id="spinsPerRedemption" type="number" min="1" value="1"></div>
+<div><label>Bits por cada tirada</label><input id="bitsPerSpin" type="number" min="1" value="100"></div>
+</div>
+<label><input id="sound" type="checkbox" style="width:auto"> Sonido en alertas</label>
+<h3>Premios</h3><div id="prizes"></div>
+<button id="addPrize" class="secondary">Agregar premio</button>
+<div class="row" style="margin-top:14px"><button id="save">Guardar configuración</button></div>
+<p id="saveMsg" class="ok"></p></section>
+
+<section class="card"><h2>4. Conectar OBS</h2>
+<p>Pega estos enlaces como <strong>Fuente de navegador</strong>. El panel también puedes agregarlo en OBS como panel personalizado.</p>
+<label>Ruleta y alertas para OBS</label><div class="row"><input id="overlayLink" readonly><button data-copy="overlayLink">Copiar</button></div>
+<label>Panel del creador</label><div class="row"><input id="panelLink" readonly><button data-copy="panelLink">Copiar</button></div>
+<p id="obsState" class="warn">Esperando que el overlay se conecte...</p></section>
+
+<section class="card"><h2>Probar sin gastar puntos</h2>
+<div class="grid"><div><label>Nombre de prueba</label><input id="simName" value="EspectadorDemo"></div>
+<div><label>Tiradas</label><input id="simSpins" type="number" min="1" max="20" value="1"></div></div>
+<div class="row" style="margin-top:12px"><button id="simulate">Agregar tirada de prueba</button><a class="button" href="/panel" target="_blank">Abrir panel del creador</a></div></section>
+</main><script src="/assets/setup.js"></script></body></html>
