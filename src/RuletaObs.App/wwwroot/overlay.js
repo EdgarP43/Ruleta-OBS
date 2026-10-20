@@ -20,7 +20,7 @@ const wheelBase=document.createElement('canvas');wheelBase.width=900;wheelBase.h
 function clearHideTimer(){if(hideTimer)clearTimeout(hideTimer);hideTimer=null;hideForKey=null;}
 function clearRevealTimer(){if(revealTimer)clearTimeout(revealTimer);revealTimer=null;}
 function scheduleHideAll(key,delay=RESULT_VISIBLE_MS){if(hideTimer&&hideForKey===key)return;clearHideTimer();hideForKey=key;hideTimer=setTimeout(()=>{hideTimer=null;hideForKey=null;hideAll();},delay);}
-function hideAll(){clearRevealTimer();$('stage').classList.add('gone');$('queueBox').classList.add('gone');$('result').classList.add('hidden');$('celebration').classList.add('hidden');}
+function hideAll(){clearRevealTimer();$('stage').classList.add('gone');$('queueBox').classList.add('gone');$('celebrationBox').classList.add('gone');$('result').classList.add('hidden');$('celebration').classList.add('hidden');}
 function formatCelebration(viewer,prize,amount,source){return (celebrationText||'').replaceAll('{usuario}',viewer||'').replaceAll('{premio}',prize||'').replaceAll('{cantidad}',amount??'').replaceAll('{origen}',label(source));}
 function showStage(){lastActivityAt=Date.now();$('stage').classList.remove('gone');showQueue();}
 function showQueue(){lastActivityAt=Date.now();$('queueBox').classList.remove('gone');}
@@ -29,6 +29,7 @@ function canRevealEntry(id){return animationState==='idle'&&!queuedSpinIds.has(i
 function showResult(viewer,prize,entryId,amount,source){
   if(entryId)displayedEntryIds.add(entryId);
   animationState='showing';activeSpinId=entryId;
+  showQueue();$('celebrationBox').classList.remove('gone');
   $('result').textContent=`${viewer}: ${prize}`;$('result').classList.remove('hidden');beep();
   const text=formatCelebration(viewer,prize,amount,source);
   const img=$('celebrationImg');
@@ -79,6 +80,7 @@ async function loadQueueOnce(){
       showResult(q.current.viewerDisplayName,q.current.prizeName,q.current.id,q.current.amount,q.current.source);
     }else{
       $('result').classList.add('hidden');
+      if(animationState!=='showing')$('celebrationBox').classList.add('gone');
       if(animationState==='idle'&&!queuedSpinIds.has(q.current.id)){clearRevealTimer();revealTimer=setTimeout(()=>{revealTimer=null;loadQueue();},Math.max(60,revealAtMs-Date.now()+60));}
     }
   }else if(animationState==='idle'){
@@ -120,7 +122,7 @@ function startSpin(data){
   animationState='spinning';activeSpinId=data.entry.id;currentEntryId=data.entry.id;
   revealAtMs=Date.now()+REVEAL_AFTER_SPUN_MS;
   prizes=data.prizes.filter(p=>p.isEnabled&&p.weight>0);wheelBaseKey='';
-  showStage();$('result').classList.add('hidden');$('celebration').classList.add('hidden');
+  showStage();$('result').classList.add('hidden');$('celebration').classList.add('hidden');$('celebrationBox').classList.add('gone');
   const segs=segments();const target=segs.find(s=>s.p.name===data.prize.name)||segs[0];
   if(!target){animationState='idle';activeSpinId=null;return;}
   const pointer=-Math.PI/2;
