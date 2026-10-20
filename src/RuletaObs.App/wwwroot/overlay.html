@@ -1,6 +1,11 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"><title>Overlay ruleta</title><link rel="stylesheet" href="/assets/overlay.css"></head>
 <body>
 <div id="alert" class="hidden"><img id="alertAvatar" alt=""><div><strong id="alertName"></strong><span id="alertText"></span></div></div>
-<div id="stage" class="hidden"><div id="pointer"></div><canvas id="wheel" width="900" height="900"></canvas><div id="result" class="hidden"></div></div>
-<aside id="queueBox"><h2>Cola de ruleta</h2><div id="queue"></div></aside>
+<main id="layout">
+  <section id="stage" class="hidden">
+    <div id="wheelWrap"><div id="pointer"></div><canvas id="wheel" width="900" height="900"></canvas></div>
+    <div id="result" class="hidden"></div>
+  </section>
+  <aside id="queueBox"><h2>Cola de ruleta</h2><div id="queue"></div></aside>
+</main>
 <script src="/assets/overlay.js"></script></body></html>

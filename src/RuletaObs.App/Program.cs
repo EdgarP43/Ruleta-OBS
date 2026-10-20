@@ -150,14 +150,21 @@ app.MapPost("/api/config", async (AppConfig updated, HttpRequest request) =>
     return Results.Json(config.Current);
 });
 
-app.MapGet("/api/queue", async () => Results.Json(new
+app.MapGet("/api/queue", async () =>
 {
-    summary = await repo.GetQueueSummaryAsync(),
-    current = await repo.GetCurrentAwaitingAsync(),
-    pending = await repo.ListAsync(SpinStatus.Pending, 100),
-    prizes = config.Current.Prizes,
-    soundEnabled = config.Current.SoundEnabled
-}));
+    var all = await repo.ListAsync(null, 2000);
+    return Results.Json(new
+    {
+        summary = await repo.GetQueueSummaryAsync(),
+        current = await repo.GetCurrentAwaitingAsync(),
+        pending = await repo.ListAsync(SpinStatus.Pending, 100),
+        entries = all.Where(e => e.Status is SpinStatus.Pending or SpinStatus.AwaitingConfirmation).ToList(),
+        history = all.Where(e => e.Status is SpinStatus.Completed or SpinStatus.Cancelled)
+            .OrderByDescending(e => e.ClosedAt ?? e.CreatedAt).Take(20).ToList(),
+        prizes = config.Current.Prizes,
+        soundEnabled = config.Current.SoundEnabled
+    });
+});
 
 app.MapGet("/api/events", async (HttpContext context, HttpRequest request) =>
 {
