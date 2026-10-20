@@ -36,6 +36,7 @@ public sealed class TwitchEventProcessor
     private readonly TwitchHelixClient _helix;
     private readonly TwitchRuntimeState _state;
     private readonly SpinService _spin;
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<string, (string? Avatar, string DisplayName, DateTimeOffset Expires)> _profileCache = new();
 
     public TwitchEventProcessor(SpinRepository repo, ConfigStore config, EventBus bus, TwitchHelixClient helix, TwitchRuntimeState state, SpinService spin)
     {
@@ -73,13 +74,22 @@ public sealed class TwitchEventProcessor
 
         string? avatar = null;
         string displayName = ev.ViewerDisplayName;
-        try
+        if (_profileCache.TryGetValue(ev.ViewerId, out var cached) && cached.Expires > DateTimeOffset.UtcNow)
         {
-            var user = await _helix.GetUserByIdAsync(ev.ViewerId, cancellationToken);
-            avatar = user?.ProfileImageUrl;
-            if (!string.IsNullOrWhiteSpace(user?.DisplayName)) displayName = user.DisplayName;
+            avatar = cached.Avatar;
+            displayName = cached.DisplayName;
         }
-        catch { /* El avatar es opcional. */ }
+        else
+        {
+            try
+            {
+                var user = await _helix.GetUserByIdAsync(ev.ViewerId, cancellationToken);
+                avatar = user?.ProfileImageUrl;
+                if (!string.IsNullOrWhiteSpace(user?.DisplayName)) displayName = user.DisplayName;
+                _profileCache[ev.ViewerId] = (avatar, displayName, DateTimeOffset.UtcNow.AddMinutes(10));
+            }
+            catch { /* El avatar es opcional. */ }
+        }
 
         var inserted = await _repo.TryAddSpinsAsync(ev.EventId, ev.Source, ev.ViewerId, ev.ViewerLogin, displayName, avatar,
             ev.Amount, ev.RewardId, ev.RewardTitle, ev.RedemptionId, spins, cancellationToken);
