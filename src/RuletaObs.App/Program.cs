@@ -156,6 +156,59 @@ app.MapPost("/api/config", async (AppConfig updated, HttpRequest request) =>
     return Results.Json(config.Current);
 });
 
+app.MapPost("/api/media", async (MediaUploadRequest request, HttpRequest http) =>
+{
+    if (!HasLocalKey(http)) return ApiResults.Error("Clave local inválida.", StatusCodes.Status403Forbidden);
+    var extension = Path.GetExtension(request.FileName).ToLowerInvariant();
+    if (extension is not (".png" or ".jpg" or ".jpeg" or ".gif" or ".webp")) return ApiResults.Error("Formato no soportado. Usa PNG, JPG, GIF o WebP.");
+    try
+    {
+        var raw = request.ContentBase64.Contains(',') ? request.ContentBase64[(request.ContentBase64.IndexOf(',') + 1)..] : request.ContentBase64;
+        var bytes = Convert.FromBase64String(raw);
+        if (bytes.Length == 0 || bytes.Length > 8 * 1024 * 1024) return ApiResults.Error("La imagen/GIF debe pesar máximo 8 MB.");
+        var mediaDirectory = Path.Combine(dataDirectory, "media");
+        Directory.CreateDirectory(mediaDirectory);
+        foreach (var old in Directory.GetFiles(mediaDirectory, "celebration.*")) File.Delete(old);
+        var fileName = "celebration" + extension;
+        await File.WriteAllBytesAsync(Path.Combine(mediaDirectory, fileName), bytes, http.HttpContext.RequestAborted);
+        config.Current.CelebrationMediaFileName = fileName;
+        config.Current.CelebrationMediaVersion = Guid.NewGuid().ToString("N");
+        await config.SaveAsync(config.Current);
+        bus.Publish("config", new { updatedAt = DateTimeOffset.UtcNow });
+        return Results.Json(new { ok = true, url = $"/media/current?key={config.Current.OverlayKey}&v={config.Current.CelebrationMediaVersion}" });
+    }
+    catch (FormatException) { return ApiResults.Error("El archivo no se pudo leer."); }
+});
+
+app.MapDelete("/api/media", async (HttpRequest http) =>
+{
+    if (!HasLocalKey(http)) return ApiResults.Error("Clave local inválida.", StatusCodes.Status403Forbidden);
+    var mediaDirectory = Path.Combine(dataDirectory, "media");
+    if (Directory.Exists(mediaDirectory)) foreach (var old in Directory.GetFiles(mediaDirectory, "celebration.*")) File.Delete(old);
+    config.Current.CelebrationMediaFileName = null;
+    config.Current.CelebrationMediaVersion = Guid.NewGuid().ToString("N");
+    await config.SaveAsync(config.Current);
+    bus.Publish("config", new { updatedAt = DateTimeOffset.UtcNow });
+    return Results.Ok(new { ok = true });
+});
+
+app.MapGet("/media/current", (HttpRequest http) =>
+{
+    if (http.Query["key"].ToString() != config.Current.OverlayKey || string.IsNullOrWhiteSpace(config.Current.CelebrationMediaFileName))
+        return Results.NotFound();
+    var path = Path.Combine(dataDirectory, "media", Path.GetFileName(config.Current.CelebrationMediaFileName));
+    if (!File.Exists(path)) return Results.NotFound();
+    var contentType = Path.GetExtension(path).ToLowerInvariant() switch
+    {
+        ".png" => "image/png",
+        ".jpg" or ".jpeg" => "image/jpeg",
+        ".gif" => "image/gif",
+        ".webp" => "image/webp",
+        _ => "application/octet-stream"
+    };
+    return Results.File(path, contentType);
+});
+
 app.MapGet("/api/queue", async () =>
 {
     var all = await repo.ListAsync(null, 2000);
@@ -168,7 +221,11 @@ app.MapGet("/api/queue", async () =>
         history = all.Where(e => e.Status is SpinStatus.Completed or SpinStatus.Cancelled)
             .OrderByDescending(e => e.ClosedAt ?? e.CreatedAt).Take(20).ToList(),
         prizes = config.Current.Prizes,
-        soundEnabled = config.Current.SoundEnabled
+        soundEnabled = config.Current.SoundEnabled,
+        celebrationText = config.Current.CelebrationText,
+        celebrationMediaUrl = string.IsNullOrWhiteSpace(config.Current.CelebrationMediaFileName)
+            ? null
+            : $"/media/current?key={config.Current.OverlayKey}&v={config.Current.CelebrationMediaVersion}"
     });
 });
 

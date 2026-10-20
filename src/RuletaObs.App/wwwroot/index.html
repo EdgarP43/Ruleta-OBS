@@ -30,6 +30,13 @@
 </div>
 <label><input id="sound" type="checkbox" style="width:auto"> Sonido en alertas</label>
 <label><input id="autoSpin" type="checkbox" style="width:auto"> Girar automáticamente cuando alguien canjea (seguirá esperando tu confirmación para descontarse)</label>
+<h3>GIF/imagen y texto después del canje</h3>
+<p class="muted">Se mostrará en la alerta y debajo del premio. Puedes usar <span class="mono">{usuario}</span>, <span class="mono">{premio}</span>, <span class="mono">{cantidad}</span> y <span class="mono">{origen}</span>.</p>
+<label>GIF o imagen (PNG, JPG, GIF o WebP, máximo 8 MB)</label>
+<input id="mediaFile" type="file" accept="image/png,image/jpeg,image/gif,image/webp">
+<div class="row" style="margin-top:10px"><img id="mediaPreview" alt="" style="max-width:260px;max-height:160px;border-radius:12px;display:none"><button id="removeMedia" class="danger" type="button">Quitar imagen</button></div>
+<label>Texto</label><input id="celebrationText" value="¡{usuario} canjeó una tirada!">
+<p id="mediaMsg" class="ok"></p>
 <h3>Premios</h3><div id="prizes"></div>
 <button id="addPrize" class="secondary">Agregar premio</button>
 <div class="row" style="margin-top:14px"><button id="save">Guardar configuración</button></div>

@@ -11,20 +11,27 @@ let animationState='idle'; // idle | spinning | showing
 let activeSpinId=null;
 const queuedSpins=[];const queuedSpinIds=new Set();const displayedEntryIds=new Set();
 let loadInFlight=false,loadDirty=false;
+let celebrationText='',celebrationMediaUrl=null;
 const wheelBase=document.createElement('canvas');wheelBase.width=900;wheelBase.height=900;let wheelBaseKey='';
 
 function clearHideTimer(){if(hideTimer)clearTimeout(hideTimer);hideTimer=null;hideForKey=null;}
 function clearRevealTimer(){if(revealTimer)clearTimeout(revealTimer);revealTimer=null;}
 function scheduleHideAll(key,delay=RESULT_VISIBLE_MS){if(hideTimer&&hideForKey===key)return;clearHideTimer();hideForKey=key;hideTimer=setTimeout(()=>{hideTimer=null;hideForKey=null;hideAll();},delay);}
-function hideAll(){clearRevealTimer();$('stage').classList.add('gone');$('queueBox').classList.add('gone');$('result').classList.add('hidden');}
+function hideAll(){clearRevealTimer();$('stage').classList.add('gone');$('queueBox').classList.add('gone');$('result').classList.add('hidden');$('celebration').classList.add('hidden');}
+function formatCelebration(viewer,prize,amount,source){return (celebrationText||'').replaceAll('{usuario}',viewer||'').replaceAll('{premio}',prize||'').replaceAll('{cantidad}',amount??'').replaceAll('{origen}',label(source));}
 function showStage(){lastActivityAt=Date.now();$('stage').classList.remove('gone');showQueue();}
 function showQueue(){lastActivityAt=Date.now();$('queueBox').classList.remove('gone');}
 function canRevealEntry(id){return animationState==='idle'&&!queuedSpinIds.has(id)&&Date.now()>=revealAtMs;}
 
-function showResult(viewer,prize,entryId){
+function showResult(viewer,prize,entryId,amount,source){
   if(entryId)displayedEntryIds.add(entryId);
   animationState='showing';activeSpinId=entryId;
   $('result').textContent=`${viewer}: ${prize}`;$('result').classList.remove('hidden');beep();
+  const text=formatCelebration(viewer,prize,amount,source);
+  const img=$('celebrationImg');
+  if(celebrationMediaUrl){img.src=celebrationMediaUrl;img.style.display='inline-block';}else img.style.display='none';
+  $('celebrationText').textContent=text;
+  if(celebrationMediaUrl||text)$('celebration').classList.remove('hidden');else $('celebration').classList.add('hidden');
   clearHideTimer();hideForKey=entryId;
   hideTimer=setTimeout(()=>{hideTimer=null;hideForKey=null;finishActiveSpin();},RESULT_VISIBLE_MS);
 }
@@ -57,7 +64,7 @@ async function loadQueue(){
   finally{loadInFlight=false;}
 }
 async function loadQueueOnce(){
-  const r=await fetch('/api/queue');const q=await r.json();soundEnabled=q.soundEnabled;
+  const r=await fetch('/api/queue');const q=await r.json();soundEnabled=q.soundEnabled;celebrationText=q.celebrationText||'';celebrationMediaUrl=q.celebrationMediaUrl||null;
   if(animationState!=='spinning')prizes=q.prizes.filter(p=>p.isEnabled&&p.weight>0);
   $('queue').innerHTML=q.summary.length?q.summary.map(x=>`<div class="person">${x.avatarUrl?`<img src="${x.avatarUrl}">`:'<img alt="">'}<div class="n"><strong>${escapeHtml(x.viewerDisplayName)}</strong><br><small>${label(x.lastSource)}</small></div><span class="badge">x${x.pendingSpins+x.awaitingConfirmation}</span></div>`).join(''):'<div class="empty">Sin tiradas pendientes</div>';
   if(q.current){
@@ -66,7 +73,7 @@ async function loadQueueOnce(){
     if(currentEntryId!==q.current.id){currentEntryId=q.current.id;revealAtMs=q.current.spunAt?new Date(q.current.spunAt).getTime()+REVEAL_AFTER_SPUN_MS:0;}
     const blockedByAnimation=animationState!=='idle'||queuedSpinIds.has(q.current.id);
     if(!blockedByAnimation&&canRevealEntry(q.current.id)){
-      showResult(q.current.viewerDisplayName,q.current.prizeName,q.current.id);
+      showResult(q.current.viewerDisplayName,q.current.prizeName,q.current.id,q.current.amount,q.current.source);
     }else{
       $('result').classList.add('hidden');
       if(animationState==='idle'&&!queuedSpinIds.has(q.current.id)){clearRevealTimer();revealTimer=setTimeout(()=>{revealTimer=null;loadQueue();},Math.max(60,revealAtMs-Date.now()+60));}
@@ -98,6 +105,7 @@ function showAlert(d){
   if(alertTimer)clearTimeout(alertTimer);
   $('alertName').textContent=d.viewer||'';$('alertText').textContent=d.message||'';
   const img=$('alertAvatar');if(d.avatar){img.src=d.avatar;img.style.display='block';}else img.style.display='none';
+  const media=$('alertMedia');if(celebrationMediaUrl){media.src=celebrationMediaUrl;media.style.display='block';}else media.style.display='none';
   $('alert').classList.remove('hidden');beep();
   alertTimer=setTimeout(()=>$('alert').classList.add('hidden'),4500);
 }
@@ -107,7 +115,7 @@ function startSpin(data){
   animationState='spinning';activeSpinId=data.entry.id;currentEntryId=data.entry.id;
   revealAtMs=Date.now()+REVEAL_AFTER_SPUN_MS;
   prizes=data.prizes.filter(p=>p.isEnabled&&p.weight>0);wheelBaseKey='';
-  showStage();$('result').classList.add('hidden');
+  showStage();$('result').classList.add('hidden');$('celebration').classList.add('hidden');
   const segs=segments();const target=segs.find(s=>s.p.name===data.prize.name)||segs[0];
   if(!target){animationState='idle';activeSpinId=null;return;}
   const pointer=-Math.PI/2;
@@ -121,8 +129,8 @@ function startSpin(data){
     if(t<1){requestAnimationFrame(frame);return;}
     rotation=end;draw();
     const wait=revealAtMs-Date.now();
-    if(wait>0){clearRevealTimer();revealTimer=setTimeout(()=>{revealTimer=null;showResult(data.entry.viewerDisplayName,data.prize.name,data.entry.id);},wait);}
-    else showResult(data.entry.viewerDisplayName,data.prize.name,data.entry.id);
+    if(wait>0){clearRevealTimer();revealTimer=setTimeout(()=>{revealTimer=null;showResult(data.entry.viewerDisplayName,data.prize.name,data.entry.id,data.entry.amount,data.entry.source);},wait);}
+    else showResult(data.entry.viewerDisplayName,data.prize.name,data.entry.id,data.entry.amount,data.entry.source);
   }
   requestAnimationFrame(frame);
 }

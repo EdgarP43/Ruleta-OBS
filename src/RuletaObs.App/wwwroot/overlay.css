@@ -5,6 +5,10 @@
 #wheel{width:100%;height:100%;display:block;filter:drop-shadow(0 20px 45px rgba(0,0,0,.55))}
 #pointer{position:absolute;z-index:3;left:50%;top:-8px;transform:translateX(-50%);width:0;height:0;border-left:25px solid transparent;border-right:25px solid transparent;border-top:48px solid #fff;filter:drop-shadow(0 3px 3px rgba(0,0,0,.5))}
 #result{margin-top:20px;max-width:92%;text-align:center;background:rgba(15,13,25,.92);border:2px solid #fff;border-radius:16px;padding:14px 22px;font-size:clamp(24px,4vw,38px);font-weight:800;transition:opacity .25s}
+#alertMedia{max-width:150px;max-height:90px;object-fit:contain;border-radius:10px}
+#celebration{margin-top:16px;text-align:center;transition:opacity .25s}
+#celebrationImg{max-width:min(420px,80%);max-height:210px;object-fit:contain;border-radius:14px}
+#celebrationText{margin-top:8px;font-size:clamp(20px,3vw,30px);font-weight:700;text-shadow:0 2px 8px rgba(0,0,0,.8)}
 #queueBox{flex:0 0 330px;width:330px;max-height:86vh;overflow:hidden;background:rgba(14,13,24,.78);border:1px solid rgba(255,255,255,.22);border-radius:18px;padding:16px;backdrop-filter:blur(5px)}
 #queueBox h2{margin:0 0 10px;font-size:22px}.person{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.12)}.person img{width:40px;height:40px;border-radius:50%;background:#333}.person .n{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.badge{background:#7c3aed;border-radius:99px;padding:4px 9px;font-weight:700}.empty{color:#d4d4d8}
 @media(max-width:900px){#layout{gap:16px;padding:16px}#queueBox{flex-basis:240px;width:240px;padding:12px}#queueBox h2{font-size:18px}#wheelWrap{width:min(100%,calc(100vh - 170px))}#result{font-size:24px;padding:10px 14px}}

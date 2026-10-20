@@ -23,6 +23,8 @@ Durante el directo:
 
 Si cierras OBS o la app, las tiradas pendientes quedan guardadas para el próximo directo.
 
+En la configuración también puedes subir un GIF o imagen (PNG, JPG, GIF o WebP, máximo 8 MB) y un texto con `{usuario}`, `{premio}`, `{cantidad}` y `{origen}`. Se muestra en la alerta del canje y debajo del premio cuando termina de girar la ruleta.
+
 ## Datos y respaldo
 
 La información queda en `%AppData%\RuletaObs`:

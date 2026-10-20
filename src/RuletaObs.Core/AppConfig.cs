@@ -14,6 +14,9 @@ public sealed class AppConfig
     public string OverlayKey { get; set; } = Convert.ToHexString(Guid.NewGuid().ToByteArray()).ToLowerInvariant();
     public bool SoundEnabled { get; set; } = true;
     public bool AutoSpinOnRedeem { get; set; } = true;
+    public string? CelebrationMediaFileName { get; set; }
+    public string CelebrationMediaVersion { get; set; } = string.Empty;
+    public string CelebrationText { get; set; } = "¡{usuario} canjeó una tirada!";
     public ConversionRules Rules { get; set; } = new();
     public List<Prize> Prizes { get; set; } = DefaultPrizes();
 

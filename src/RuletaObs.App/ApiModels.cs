@@ -7,6 +7,7 @@ public sealed record CreateRewardRequest(string Title, int Cost, string? Prompt)
 public sealed record AssignRewardRequest(string RewardId, string Title, bool ManageableByThisApp);
 public sealed record SimulateRequest(string? DisplayName, string Source, int Spins, int Amount);
 public sealed record ImportEntryRequest(string? DisplayName, string? Source, int Spins);
+public sealed record MediaUploadRequest(string FileName, string ContentBase64);
 
 public static class ApiResults
 {
