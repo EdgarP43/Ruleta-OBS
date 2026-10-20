@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
+    <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
     <AssemblyName>RuletaObs</AssemblyName>
     <RootNamespace>RuletaObs.App</RootNamespace>
