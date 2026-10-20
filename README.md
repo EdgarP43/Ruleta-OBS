@@ -85,7 +85,7 @@ Configuración en https://dev.twitch.tv/console/apps:
 
 - Nombre sin la palabra Twitch, por ejemplo `Ruleta OBS Overlay`.
 - Client Type: **Public**.
-- OAuth Redirect URL: `http://localhost` (valor de respaldo; Device Code Flow no redirige).
+- OAuth Redirect URL: `http://localhost:47832` (sin barra final; es el puerto fijo de la app y solo actúa como respaldo si el usuario cancela en Device Code Flow).
 - Categoría: Broadcaster Suite.
 
 Scopes solicitados: `channel:manage:redemptions`, `channel:read:redemptions` y `bits:read`.
