@@ -43,6 +43,12 @@ builder.Services.AddSingleton<TwitchEventProcessor>();
 builder.Services.AddHostedService<TwitchWorker>();
 
 var app = builder.Build();
+app.Use(async (context, next) =>
+{
+    if (context.Request.Path == "/" || context.Request.Path == "/overlay" || context.Request.Path == "/panel" || context.Request.Path.StartsWithSegments("/assets"))
+        context.Response.Headers.CacheControl = "no-store, no-cache, must-revalidate";
+    await next();
+});
 var config = app.Services.GetRequiredService<ConfigStore>();
 var repo = app.Services.GetRequiredService<SpinRepository>();
 var bus = app.Services.GetRequiredService<EventBus>();
