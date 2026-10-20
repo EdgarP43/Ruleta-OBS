@@ -5,5 +5,5 @@ namespace RuletaObs.App;
 // TWITCH_CLIENT_ID del repositorio. Nunca colocar aquí un Client Secret.
 internal static class BuiltInTwitchClientId
 {
-    public const string Value = "";
+    public const string Value = "m5g479qejh6l7d8lmc0skoxmduv4y8";
 }
