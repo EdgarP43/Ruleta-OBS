@@ -392,6 +392,13 @@ app.MapPost("/api/queue/import", async (List<ImportEntryRequest> entries, HttpRe
     return Results.Json(new { ok = true, importedGroups = count });
 });
 
+app.MapPost("/api/admin/reload-overlays", (HttpRequest http) =>
+{
+    if (!HasLocalKey(http)) return ApiResults.Error("Clave local inválida.", StatusCodes.Status403Forbidden);
+    bus.Publish("reload", new { at = DateTimeOffset.UtcNow });
+    return Results.Ok(new { ok = true });
+});
+
 app.MapGet("/healthz", () => Results.Ok(new { ok = true, utc = DateTimeOffset.UtcNow }));
 
 if (!string.Equals(Environment.GetEnvironmentVariable("RULETA_NO_BROWSER"), "1", StringComparison.Ordinal))

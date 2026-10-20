@@ -9,7 +9,7 @@ let hideTimer=null,hideForKey=null,revealTimer=null,alertTimer=null;
 let currentEntryId=null,revealAtMs=0,lastActivityAt=0;
 let animationState='idle'; // idle | spinning | showing
 let activeSpinId=null;
-const queuedSpins=[];const queuedSpinIds=new Set();
+const queuedSpins=[];const queuedSpinIds=new Set();const displayedEntryIds=new Set();
 let loadInFlight=false,loadDirty=false;
 const wheelBase=document.createElement('canvas');wheelBase.width=900;wheelBase.height=900;let wheelBaseKey='';
 
@@ -22,6 +22,7 @@ function showQueue(){lastActivityAt=Date.now();$('queueBox').classList.remove('g
 function canRevealEntry(id){return animationState==='idle'&&!queuedSpinIds.has(id)&&Date.now()>=revealAtMs;}
 
 function showResult(viewer,prize,entryId){
+  if(entryId)displayedEntryIds.add(entryId);
   animationState='showing';activeSpinId=entryId;
   $('result').textContent=`${viewer}: ${prize}`;$('result').classList.remove('hidden');beep();
   clearHideTimer();hideForKey=entryId;
@@ -44,7 +45,7 @@ async function playNextQueuedSpin(){
 }
 function enqueueSpin(data){
   const id=data.entry.id;
-  if(id===activeSpinId||queuedSpinIds.has(id))return;
+  if(id===activeSpinId||queuedSpinIds.has(id)||displayedEntryIds.has(id))return;
   if(animationState!=='idle'){queuedSpins.push(data);queuedSpinIds.add(id);showQueue();return;}
   startSpin(data);
 }
@@ -60,6 +61,7 @@ async function loadQueueOnce(){
   if(animationState!=='spinning')prizes=q.prizes.filter(p=>p.isEnabled&&p.weight>0);
   $('queue').innerHTML=q.summary.length?q.summary.map(x=>`<div class="person">${x.avatarUrl?`<img src="${x.avatarUrl}">`:'<img alt="">'}<div class="n"><strong>${escapeHtml(x.viewerDisplayName)}</strong><br><small>${label(x.lastSource)}</small></div><span class="badge">x${x.pendingSpins+x.awaitingConfirmation}</span></div>`).join(''):'<div class="empty">Sin tiradas pendientes</div>';
   if(q.current){
+    if(displayedEntryIds.has(q.current.id)&&animationState==='idle'&&!queuedSpinIds.has(q.current.id)){hideAll();draw();return;}
     showStage();draw();
     if(currentEntryId!==q.current.id){currentEntryId=q.current.id;revealAtMs=q.current.spunAt?new Date(q.current.spunAt).getTime()+REVEAL_AFTER_SPUN_MS:0;}
     const blockedByAnimation=animationState!=='idle'||queuedSpinIds.has(q.current.id);
