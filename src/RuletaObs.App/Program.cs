@@ -149,6 +149,9 @@ app.MapPost("/api/config", async (AppConfig updated, HttpRequest request) =>
     if (!HasLocalKey(request)) return ApiResults.Error("Clave local inválida.", StatusCodes.Status403Forbidden);
     if (updated.Prizes is null || updated.Prizes.Count == 0) return ApiResults.Error("Debe existir al menos un premio.");
     if (updated.Prizes.Any(p => string.IsNullOrWhiteSpace(p.Name) || p.Weight < 0)) return ApiResults.Error("Revisa nombre y peso de los premios.");
+    updated.WheelCenterText = string.IsNullOrWhiteSpace(updated.WheelCenterText) ? "RULETA" : updated.WheelCenterText.Trim()[..Math.Min(24, updated.WheelCenterText.Trim().Length)];
+    updated.WheelLabelSizePercent = Math.Clamp(updated.WheelLabelSizePercent, 60, 150);
+    updated.SoundVolume = Math.Clamp(updated.SoundVolume, 0, 100);
     updated.OverlayKey = config.Current.OverlayKey;
     await config.SaveAsync(updated);
     bus.Publish("config", new { updatedAt = DateTimeOffset.UtcNow });
@@ -282,7 +285,17 @@ app.MapGet("/api/queue", async () =>
         soundUrl = string.IsNullOrWhiteSpace(config.Current.SoundMediaFileName)
             ? null
             : $"/sound/current?key={config.Current.OverlayKey}&v={config.Current.SoundMediaVersion}",
-        soundVolume = Math.Clamp(config.Current.SoundVolume, 0, 100)
+        soundVolume = Math.Clamp(config.Current.SoundVolume, 0, 100),
+        theme = new
+        {
+            fontFamily = config.Current.WheelFontFamily,
+            centerText = config.Current.WheelCenterText,
+            centerBackground = config.Current.WheelCenterBackground,
+            centerTextColor = config.Current.WheelCenterTextColor,
+            labelColor = config.Current.WheelLabelColor,
+            labelSizePercent = Math.Clamp(config.Current.WheelLabelSizePercent, 60, 150),
+            resultTextColor = config.Current.ResultTextColor
+        }
     });
 });
 

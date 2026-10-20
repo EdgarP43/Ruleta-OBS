@@ -20,6 +20,13 @@ public sealed class AppConfig
     public string? SoundMediaFileName { get; set; }
     public string SoundMediaVersion { get; set; } = string.Empty;
     public int SoundVolume { get; set; } = 80;
+    public string WheelFontFamily { get; set; } = "Segoe UI";
+    public string WheelCenterText { get; set; } = "RULETA";
+    public string WheelCenterBackground { get; set; } = "#171321";
+    public string WheelCenterTextColor { get; set; } = "#ffffff";
+    public string WheelLabelColor { get; set; } = "#ffffff";
+    public int WheelLabelSizePercent { get; set; } = 100;
+    public string ResultTextColor { get; set; } = "#ffffff";
     public ConversionRules Rules { get; set; } = new();
     public List<Prize> Prizes { get; set; } = DefaultPrizes();
 

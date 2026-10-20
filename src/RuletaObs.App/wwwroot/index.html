@@ -45,6 +45,17 @@
 <input id="soundVolume" type="range" min="0" max="100" value="80">
 <div class="row" style="margin-top:10px"><button id="testSound" class="secondary" type="button">Probar sonido</button><button id="removeSound" class="danger" type="button">Quitar sonido</button></div>
 <p id="soundMsg" class="ok"></p>
+<h3>Apariencia de la ruleta</h3>
+<div class="grid">
+<div><label>Tipo de letra</label><select id="wheelFont"><option>Segoe UI</option><option>Arial</option><option>Verdana</option><option>Trebuchet MS</option><option>Georgia</option><option>Impact</option><option>Comic Sans MS</option><option>Courier New</option><option>Tahoma</option></select></div>
+<div><label>Texto del centro</label><input id="centerText" maxlength="24" value="RULETA"></div>
+<div><label>Color del centro</label><input id="centerBg" type="color" value="#171321"></div>
+<div><label>Color de letra del centro</label><input id="centerColor" type="color" value="#ffffff"></div>
+<div><label>Color de letra de premios</label><input id="labelColor" type="color" value="#ffffff"></div>
+<div><label>Color del texto del resultado</label><input id="resultColor" type="color" value="#ffffff"></div>
+</div>
+<label>Tamaño de letra de premios: <span id="labelSizeLabel">100</span>%</label>
+<input id="labelSize" type="range" min="60" max="150" value="100">
 <h3>Premios</h3><div id="prizes"></div>
 <button id="addPrize" class="secondary">Agregar premio</button>
 <div class="row" style="margin-top:14px"><button id="save">Guardar configuración</button></div>

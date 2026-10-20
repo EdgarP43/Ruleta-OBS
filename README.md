@@ -23,7 +23,7 @@ Durante el directo:
 
 Si cierras OBS o la app, las tiradas pendientes quedan guardadas para el próximo directo.
 
-En la configuración también puedes subir un GIF o imagen (PNG, JPG, GIF o WebP, máximo 8 MB) y un texto con `{usuario}`, `{premio}`, `{cantidad}` y `{origen}`. Se muestra en la alerta del canje y debajo del premio cuando termina de girar la ruleta. También puedes subir un sonido personalizado (MP3, WAV, OGG o M4A, máximo 5 MB) y ajustar su volumen; si no hay sonido personalizado se usa un pitido corto.
+En la configuración también puedes subir un GIF o imagen (PNG, JPG, GIF o WebP, máximo 8 MB) y un texto con `{usuario}`, `{premio}`, `{cantidad}` y `{origen}`. Se muestra en la alerta del canje y debajo del premio cuando termina de girar la ruleta. También puedes subir un sonido personalizado (MP3, WAV, OGG o M4A, máximo 5 MB) y ajustar su volumen; si no hay sonido personalizado se usa un pitido corto. En Apariencia puedes cambiar la fuente de la ruleta, el texto y colores del centro, el color/tamaño de la letra de los premios y el color del resultado.
 
 ## Datos y respaldo
 
