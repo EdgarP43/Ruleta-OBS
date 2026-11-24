@@ -59,18 +59,34 @@ var helix = app.Services.GetRequiredService<TwitchHelixClient>();
 var authFlow = app.Services.GetRequiredService<AuthFlowState>();
 var spinService = app.Services.GetRequiredService<SpinService>();
 
-string? GetEmbeddedText(string fileName)
+string? FindEmbeddedResource(string fileName)
 {
     var assembly = Assembly.GetExecutingAssembly();
-    var resource = assembly.GetManifestResourceNames()
+    return assembly.GetManifestResourceNames()
         .FirstOrDefault(n => n.Replace('/', '.').EndsWith("." + fileName, StringComparison.OrdinalIgnoreCase) ||
                              n.Replace('\\', '.').EndsWith("." + fileName, StringComparison.OrdinalIgnoreCase) ||
                              n.Equals(fileName, StringComparison.OrdinalIgnoreCase));
+}
+
+string? GetEmbeddedText(string fileName)
+{
+    var resource = FindEmbeddedResource(fileName);
     if (resource is null) return null;
-    using var stream = assembly.GetManifestResourceStream(resource);
+    using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resource);
     if (stream is null) return null;
     using var reader = new StreamReader(stream, Encoding.UTF8);
     return reader.ReadToEnd();
+}
+
+byte[]? GetEmbeddedBytes(string fileName)
+{
+    var resource = FindEmbeddedResource(fileName);
+    if (resource is null) return null;
+    using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resource);
+    if (stream is null) return null;
+    using var ms = new MemoryStream();
+    stream.CopyTo(ms);
+    return ms.ToArray();
 }
 
 IResult Page(string fileName)
@@ -114,16 +130,28 @@ app.MapGet("/overlay", (HttpRequest request) =>
     request.Query["key"].ToString() == config.Current.OverlayKey ? Page("overlay.html") : Results.StatusCode(StatusCodes.Status403Forbidden));
 app.MapGet("/assets/{file}", (string file) =>
 {
-    var content = GetEmbeddedText(file);
-    if (content is null) return Results.NotFound();
-    var type = Path.GetExtension(file).ToLowerInvariant() switch
+    var ext = Path.GetExtension(file).ToLowerInvariant();
+    var type = ext switch
     {
         ".css" => "text/css; charset=utf-8",
         ".js" => "text/javascript; charset=utf-8",
         ".html" => "text/html; charset=utf-8",
+        ".png" => "image/png",
+        ".jpg" or ".jpeg" => "image/jpeg",
+        ".gif" => "image/gif",
+        ".webp" => "image/webp",
+        ".svg" => "image/svg+xml; charset=utf-8",
         _ => "application/octet-stream"
     };
-    return Results.Content(content, type);
+
+    if (ext is ".png" or ".jpg" or ".jpeg" or ".gif" or ".webp")
+    {
+        var bytes = GetEmbeddedBytes(file);
+        return bytes is null ? Results.NotFound() : Results.File(bytes, type);
+    }
+
+    var content = GetEmbeddedText(file);
+    return content is null ? Results.NotFound() : Results.Content(content, type);
 });
 app.MapGet("/favicon.ico", () => Results.NoContent());
 
@@ -524,6 +552,22 @@ app.MapPost("/api/admin/reload-overlays", (HttpRequest http) =>
     if (!HasLocalKey(http)) return ApiResults.Error("Clave local inválida.", StatusCodes.Status403Forbidden);
     bus.Publish("reload", new { at = DateTimeOffset.UtcNow });
     return Results.Ok(new { ok = true });
+});
+
+app.MapPost("/api/shutdown", (HttpRequest http, IHostApplicationLifetime lifetime) =>
+{
+    var remote = http.HttpContext.Connection.RemoteIpAddress;
+    var isLocal = remote is null || System.Net.IPAddress.IsLoopback(remote) ||
+                  (remote.IsIPv4MappedToIPv6 && System.Net.IPAddress.IsLoopback(remote.MapToIPv4()));
+    if (!isLocal) return ApiResults.Error("Solo se puede cerrar desde esta PC.", StatusCodes.Status403Forbidden);
+    if (!HasLocalKey(http)) return ApiResults.Error("Clave local inválida.", StatusCodes.Status403Forbidden);
+
+    _ = Task.Run(async () =>
+    {
+        await Task.Delay(250);
+        lifetime.StopApplication();
+    });
+    return Results.Json(new { ok = true, message = "Cerrando Ruleta OBS..." });
 });
 
 app.MapGet("/healthz", () => Results.Ok(new { ok = true, utc = DateTimeOffset.UtcNow }));

@@ -1,16 +1,39 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Overlay ruleta</title><link rel="stylesheet" href="/assets/overlay.css"></head>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Overlay ruleta</title><link rel="stylesheet" href="/assets/overlay.css?v=31"></head>
 <body>
-<div id="alert" class="hidden"><img id="alertAvatar" alt=""><img id="alertMedia" alt=""><div><strong id="alertName"></strong><span id="alertText"></span></div></div>
+<div id="alert" class="hidden themed-box">
+  <img class="michi tl" src="/assets/michi-esquina-dormido.png?v=2" alt="">
+  <img class="michi tr" src="/assets/michi-esquina-curioso.png?v=3" alt="">
+  <img class="michi bl" src="/assets/michi-esquina-lana.png?v=2" alt="">
+  <img class="michi br" src="/assets/michi-esquina.png?v=7" alt="">
+  <img id="alertAvatar" alt=""><img id="alertMedia" alt=""><div><strong id="alertName" class="bubble-title"></strong><span id="alertText"></span></div>
+</div>
 <main id="layout">
   <section id="stage" class="gone">
-    <div id="wheelWrap"><div id="pointer"></div><canvas id="wheel" width="900" height="900"></canvas></div>
+    <div id="wheelWrap">
+      <div id="pointer" aria-hidden="true">
+        <img class="pointer-michi" src="/assets/michi-flecha.png?v=9" alt="">
+      </div>
+      <canvas id="wheel" width="900" height="900"></canvas>
+    </div>
   </section>
   <div id="side">
-    <aside id="queueBox" class="gone"><h2>Cola de ruleta</h2><div id="queue"></div></aside>
+    <aside id="queueBox" class="gone themed-box">
+      <img class="michi tl" src="/assets/michi-esquina-dormido.png?v=2" alt="">
+      <img class="michi tr" src="/assets/michi-esquina-curioso.png?v=3" alt="">
+      <img class="michi bl" src="/assets/michi-esquina-lana.png?v=2" alt="">
+      <img class="michi br" src="/assets/michi-esquina.png?v=7" alt="">
+      <h2 class="bubble-title">Cola de ruleta</h2><div id="queue"></div>
+    </aside>
     <section id="celebrationBox" class="gone">
-      <div id="result" class="hidden"></div>
+      <div id="result" class="hidden themed-box">
+        <img class="michi tl" src="/assets/michi-esquina-dormido.png?v=2" alt="">
+        <img class="michi tr" src="/assets/michi-esquina-curioso.png?v=3" alt="">
+        <img class="michi bl" src="/assets/michi-esquina-lana.png?v=2" alt="">
+        <img class="michi br" src="/assets/michi-esquina.png?v=7" alt="">
+        <span id="resultText"></span>
+      </div>
       <div id="celebration" class="hidden"><img id="celebrationImg" alt=""><div id="celebrationText"></div></div>
     </section>
   </div>
 </main>
-<script src="/assets/overlay.js?v=9"></script></body></html>
+<script src="/assets/overlay.js?v=17"></script></body></html>

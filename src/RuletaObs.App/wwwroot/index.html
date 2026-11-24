@@ -1,9 +1,15 @@
 <!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Ruleta OBS - Configuración</title><link rel="stylesheet" href="/assets/app.css"></head>
+<title>Ruleta OBS - Configuración</title><link rel="stylesheet" href="/assets/app.css?v=12"></head>
 <body><main>
 <h1>Ruleta OBS</h1><p class="muted">Configura todo una vez. Después solo abre OBS y usa el panel del creador.</p>
-<div class="card"><h2>Estado</h2><div id="status">Cargando...</div><pre id="logs"></pre></div>
+<div class="card"><h2>Estado</h2><div id="status">Cargando...</div><pre id="logs"></pre>
+<div class="row" style="margin-top:12px">
+<button id="shutdown" class="danger" type="button">Cerrar Ruleta OBS</button>
+<span id="shutdownMsg" class="muted"></span>
+</div>
+<p class="muted" style="margin:8px 0 0">Cierra la app sin pasar por el Administrador de tareas. La cola queda guardada.</p>
+</div>
 
 <section class="card"><h2>1. Conectar Twitch</h2>
 <p class="muted">Pulsa conectar, inicia sesión en Twitch y autoriza. No necesitas entrar a Twitch Dev.</p>
@@ -47,9 +53,9 @@
 <p id="soundMsg" class="ok"></p>
 <h3>Apariencia de la ruleta</h3>
 <div class="grid">
-<div><label>Tipo de letra</label><select id="wheelFont"><option>Segoe UI</option><option>Arial</option><option>Verdana</option><option>Trebuchet MS</option><option>Georgia</option><option>Impact</option><option>Comic Sans MS</option><option>Courier New</option><option>Tahoma</option></select></div>
+<div><label>Tipo de letra</label><select id="wheelFont"><option>Luckiest Guy</option><option>Fredoka</option><option>Nunito</option><option>Segoe UI</option><option>Arial</option><option>Verdana</option><option>Trebuchet MS</option><option>Georgia</option><option>Impact</option><option>Comic Sans MS</option><option>Courier New</option><option>Tahoma</option></select></div>
 <div><label>Texto del centro</label><input id="centerText" maxlength="24" value="RULETA"></div>
-<div><label>Color del centro</label><input id="centerBg" type="color" value="#171321"></div>
+<div><label>Color del centro</label><input id="centerBg" type="color" value="#3d2b7c"></div>
 <div><label>Color de letra del centro</label><input id="centerColor" type="color" value="#ffffff"></div>
 <div><label>Color de letra de premios</label><input id="labelColor" type="color" value="#ffffff"></div>
 <div><label>Color del texto del resultado</label><input id="resultColor" type="color" value="#ffffff"></div>

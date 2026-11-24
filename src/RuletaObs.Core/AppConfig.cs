@@ -20,9 +20,9 @@ public sealed class AppConfig
     public string? SoundMediaFileName { get; set; }
     public string SoundMediaVersion { get; set; } = string.Empty;
     public int SoundVolume { get; set; } = 80;
-    public string WheelFontFamily { get; set; } = "Segoe UI";
+    public string WheelFontFamily { get; set; } = "Luckiest Guy";
     public string WheelCenterText { get; set; } = "RULETA";
-    public string WheelCenterBackground { get; set; } = "#171321";
+    public string WheelCenterBackground { get; set; } = "#3d2b7c";
     public string WheelCenterTextColor { get; set; } = "#ffffff";
     public string WheelLabelColor { get; set; } = "#ffffff";
     public int WheelLabelSizePercent { get; set; } = 100;
@@ -32,11 +32,11 @@ public sealed class AppConfig
 
     public static List<Prize> DefaultPrizes() => new()
     {
-        new Prize { Name = "Nada", Weight = 25, Color = "#475569" },
-        new Prize { Name = "Premio chico", Weight = 35, Color = "#0ea5e9" },
-        new Prize { Name = "Premio mediano", Weight = 25, Color = "#22c55e" },
-        new Prize { Name = "Premio grande", Weight = 10, Color = "#f59e0b" },
-        new Prize { Name = "Jackpot", Weight = 5, Color = "#ec4899" }
+        new Prize { Name = "Nada", Weight = 25, Color = "#5b4a8a" },
+        new Prize { Name = "Premio chico", Weight = 35, Color = "#8b5cf6" },
+        new Prize { Name = "Premio mediano", Weight = 25, Color = "#a78bfa" },
+        new Prize { Name = "Premio grande", Weight = 10, Color = "#f0abfc" },
+        new Prize { Name = "Jackpot", Weight = 5, Color = "#fde68a" }
     };
 }
 

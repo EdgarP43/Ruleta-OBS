@@ -1,17 +1,183 @@
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:transparent;font-family:Segoe UI,system-ui,sans-serif;color:#fff}.hidden{opacity:0!important;pointer-events:none!important}.gone{display:none!important}#alert{position:absolute;z-index:10;top:36px;left:50%;transform:translateX(-50%);display:flex;gap:14px;align-items:center;background:rgba(20,18,35,.92);border:2px solid #8b5cf6;border-radius:18px;padding:14px 20px;font-size:26px;transition:opacity .25s;box-shadow:0 10px 40px rgba(0,0,0,.4)}#alert img{width:58px;height:58px;border-radius:50%;background:#333}#alert span{display:block;font-size:20px;color:#ddd6fe}
-#layout{width:100%;height:100%;display:flex;align-items:center;justify-content:flex-end;gap:28px;padding:28px}
-#stage{flex:1 1 auto;min-width:0;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .25s}
-#wheelWrap{position:relative;width:min(100%,calc(100vh - 70px),860px);max-height:calc(100vh - 70px);aspect-ratio:1/1;flex:none}
-#wheel{width:100%;height:100%;display:block;filter:drop-shadow(0 20px 45px rgba(0,0,0,.55))}
-#pointer{position:absolute;z-index:3;left:50%;top:-8px;transform:translateX(-50%);width:0;height:0;border-left:25px solid transparent;border-right:25px solid transparent;border-top:48px solid #fff;filter:drop-shadow(0 3px 3px rgba(0,0,0,.5))}
-#side{flex:0 0 330px;width:330px;height:100%;display:flex;flex-direction:column;gap:16px;min-height:0}
-#result{width:100%;text-align:center;background:rgba(15,13,25,.92);border:2px solid #fff;border-radius:16px;padding:14px 16px;font-size:clamp(22px,2.4vw,30px);font-weight:800;overflow-wrap:break-word;transition:opacity .25s}
+@import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Fredoka:wght@600;700&display=swap');
+
+*{box-sizing:border-box}
+html,body{
+  margin:0;width:100%;height:100%;overflow:hidden;background:transparent;
+  font-family:"Luckiest Guy","Fredoka",Segoe UI,system-ui,sans-serif;color:#fff;
+}
+.hidden{opacity:0!important;pointer-events:none!important}
+.gone{display:none!important}
+
+.bubble-title{
+  font-family:"Luckiest Guy","Fredoka",cursive,sans-serif;
+  color:#fff !important;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  text-shadow:0 2px 8px rgba(0,0,0,.85),0 0 12px rgba(196,181,253,.45);
+}
+
+.themed-box{position:relative;overflow:visible}
+.michi{
+  position:absolute;z-index:20;
+  width:48px;height:48px;object-fit:contain;
+  pointer-events:none;user-select:none;
+  filter:drop-shadow(0 2px 6px rgba(0,0,0,.75));
+  display:block !important;
+  opacity:1 !important;
+  visibility:visible !important;
+  background:transparent;
+  border:0;
+  border-radius:0;
+}
+.michi.tl{top:-6px;left:-6px}
+.michi.tr{top:-6px;right:-6px}
+.michi.bl{bottom:-6px;left:-6px}
+.michi.br{bottom:-6px;right:-6px}
+
+#alert{
+  position:absolute;z-index:10;top:40px;left:50%;transform:translateX(-50%);
+  display:flex;gap:14px;align-items:center;
+  background:linear-gradient(135deg,rgba(61,43,124,.94),rgba(36,24,78,.96));
+  border:2px solid #c4b5fd;
+  border-radius:22px;
+  padding:18px 48px;
+  font-size:26px;
+  transition:opacity .25s;
+  overflow:visible;
+  box-shadow:0 0 0 1px rgba(255,255,255,.08),0 12px 40px rgba(76,29,149,.55),0 0 28px rgba(167,139,250,.35);
+}
+#alert img:not(.michi){width:58px;height:58px;border-radius:50%;background:#2a1d5a;border:2px solid #ddd6fe}
+#alert #alertText{display:block;font-size:18px;color:#e9d5ff;font-family:"Fredoka",sans-serif;font-weight:600;text-shadow:none;text-transform:none;letter-spacing:0}
+#alert #alertName{font-size:28px}
+
+#layout{
+  width:100%;height:100%;display:flex;align-items:center;justify-content:flex-end;
+  gap:28px;padding:36px 28px 28px;
+}
+
+#stage{
+  flex:1 1 auto;min-width:0;height:100%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  transition:opacity .25s;overflow:visible;
+}
+
+#wheelWrap{
+  position:relative;
+  width:min(100%,calc(100vh - 110px),860px);
+  max-height:calc(100vh - 110px);
+  aspect-ratio:1/1;flex:none;overflow:visible;
+}
+#wheel{
+  width:100%;height:100%;display:block;
+  filter:drop-shadow(0 0 18px rgba(167,139,250,.45)) drop-shadow(0 18px 40px rgba(0,0,0,.55));
+}
+#pointer{
+  position:absolute;z-index:3;left:50%;top:-72px;transform:translateX(-50%);
+  width:72px;height:88px;
+  filter:drop-shadow(0 0 10px rgba(167,139,250,.55)) drop-shadow(0 3px 6px rgba(0,0,0,.45));
+  pointer-events:none;
+}
+#pointer .pointer-michi{
+  width:72px;height:88px;object-fit:contain;object-position:center bottom;
+  display:block;
+  background:transparent;
+  border:0;
+}
+
+#side{
+  flex:0 0 330px;width:330px;height:100%;
+  display:flex;flex-direction:column;gap:20px;min-height:0;
+  overflow:visible;padding:18px 12px 18px 0;
+}
+
+#result{
+  width:100%;text-align:center;
+  background:linear-gradient(160deg,rgba(61,43,124,.95),rgba(24,16,54,.96));
+  border:2px solid #c4b5fd;
+  border-radius:18px;
+  padding:22px 44px;
+  font-size:clamp(22px,2.4vw,30px);
+  overflow:visible;
+  overflow-wrap:break-word;transition:opacity .25s;
+  box-shadow:0 0 24px rgba(139,92,246,.4);
+}
 #result.hidden,#celebration.hidden{display:none!important}
+#resultText{
+  display:block;
+  font-family:"Luckiest Guy","Fredoka",cursive,sans-serif;
+  color:#fff !important;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  text-shadow:0 2px 8px rgba(0,0,0,.85),0 0 14px rgba(196,181,253,.5);
+}
+
 #alertMedia{max-width:150px;max-height:90px;object-fit:contain;border-radius:10px}
-#celebrationBox{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;overflow:hidden}
+#celebrationBox{
+  flex:1 1 auto;min-height:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  overflow:visible;
+}
 #celebration{margin-top:14px;width:100%;text-align:center;transition:opacity .25s}
-#celebrationImg{max-width:100%;max-height:300px;object-fit:contain;border-radius:14px}
-#celebrationText{margin-top:8px;font-size:clamp(19px,2vw,26px);font-weight:700;text-shadow:0 2px 8px rgba(0,0,0,.8);overflow-wrap:break-word}
-#queueBox{flex:0 1 auto;width:100%;max-height:52vh;overflow:hidden;background:rgba(14,13,24,.78);border:1px solid rgba(255,255,255,.22);border-radius:18px;padding:16px;backdrop-filter:blur(5px)}
-#queueBox h2{margin:0 0 10px;font-size:22px}.person{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.12)}.person img{width:40px;height:40px;border-radius:50%;background:#333}.person .n{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.badge{background:#7c3aed;border-radius:99px;padding:4px 9px;font-weight:700}.empty{color:#d4d4d8}
-@media(max-width:900px){#layout{gap:16px;padding:16px}#side{flex-basis:240px;width:240px}#queueBox{padding:12px}#queueBox h2{font-size:18px}#wheelWrap{width:min(100%,calc(100vh - 60px))}#result{font-size:22px;padding:10px 12px}#celebrationImg{max-height:220px}}
+#celebrationImg{max-width:100%;max-height:300px;object-fit:contain;border-radius:14px;box-shadow:0 0 20px rgba(167,139,250,.35)}
+#celebrationText{
+  margin-top:8px;font-size:clamp(18px,1.8vw,24px);
+  font-family:"Luckiest Guy","Fredoka",cursive,sans-serif;
+  color:#fff !important;
+  letter-spacing:.03em;
+  text-transform:uppercase;
+  text-shadow:0 2px 8px rgba(0,0,0,.85),0 0 14px rgba(196,181,253,.5);
+  overflow-wrap:break-word;
+}
+
+#queueBox{
+  flex:0 1 auto;width:100%;max-height:52vh;
+  overflow:visible;
+  background:linear-gradient(165deg,rgba(61,43,124,.82),rgba(28,18,64,.88));
+  border:1px solid rgba(196,181,253,.45);
+  border-radius:20px;padding:18px 16px 14px;
+  backdrop-filter:blur(8px);
+  box-shadow:0 0 28px rgba(91,33,182,.35),inset 0 1px 0 rgba(255,255,255,.12);
+}
+#queueBox h2{
+  margin:0 0 10px;font-size:24px;
+  padding:0 36px;
+}
+#queue{
+  max-height:calc(52vh - 70px);
+  overflow:auto;
+  padding-right:2px;
+}
+
+.person{
+  display:flex;align-items:center;gap:10px;padding:8px 0;
+  border-bottom:1px solid rgba(196,181,253,.18);
+  font-family:"Fredoka",sans-serif;
+}
+.person img{width:40px;height:40px;border-radius:50%;background:#2a1d5a;border:2px solid rgba(221,214,254,.55)}
+.person .n{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.person .n strong{
+  font-family:"Luckiest Guy","Fredoka",cursive,sans-serif;
+  letter-spacing:.03em;
+  color:#fff !important;
+  text-shadow:0 2px 6px rgba(0,0,0,.85);
+}
+.badge{
+  background:linear-gradient(135deg,#7c3aed,#a78bfa);
+  border-radius:99px;padding:4px 10px;font-weight:700;
+  font-family:"Fredoka",sans-serif;
+  box-shadow:0 0 12px rgba(139,92,246,.55);
+}
+.empty{color:#c4b5fd;font-family:"Fredoka",sans-serif}
+
+@media(max-width:900px){
+  #layout{gap:16px;padding:28px 16px 16px}
+  #side{flex-basis:240px;width:240px}
+  #queueBox{padding:14px 12px 10px}
+  #queueBox h2{font-size:20px}
+  #wheelWrap{width:min(100%,calc(100vh - 100px))}
+  #result{font-size:22px;padding:16px 36px}
+  #celebrationImg{max-height:220px}
+  .michi{width:36px;height:36px}
+  #pointer{top:-58px;width:58px;height:72px}
+  #pointer .pointer-michi{width:58px;height:72px}
+}
