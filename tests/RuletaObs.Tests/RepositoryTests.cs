@@ -31,6 +31,23 @@ public sealed class RepositoryTests : IDisposable
         Assert.Equal(1, summary.AwaitingConfirmation);
     }
 
+    [Fact]
+    public async Task Clear_history_keeps_open_queue()
+    {
+        var repo = new SpinRepository(_dir);
+        await repo.TryAddSpinsAsync("evt-3", SpinSource.Bits, "u1", "ana", "Ana", null, 100, null, null, null, 2);
+        var done = await repo.GetNextPendingAsync();
+        Assert.NotNull(done);
+        done!.MarkSpun("Premio", DateTimeOffset.UtcNow);
+        done.Complete(DateTimeOffset.UtcNow);
+        await repo.UpdateAsync(done);
+
+        var deleted = await repo.ClearHistoryAsync();
+        Assert.Equal(1, deleted);
+        Assert.Empty(await repo.ListAsync(SpinStatus.Completed));
+        Assert.Single(await repo.ListAsync(SpinStatus.Pending));
+    }
+
     public void Dispose()
     {
         try { if (Directory.Exists(_dir)) Directory.Delete(_dir, true); } catch { }

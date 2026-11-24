@@ -533,6 +533,14 @@ app.MapGet("/api/queue/export", async (HttpRequest http) =>
     return Results.File(Encoding.UTF8.GetBytes(json), "application/json", $"ruleta-cola-{DateTime.Now:yyyyMMddHHmm}.json");
 });
 
+app.MapPost("/api/history/clear", async (HttpRequest http) =>
+{
+    if (!HasLocalKey(http)) return ApiResults.Error("Clave local inválida.", StatusCodes.Status403Forbidden);
+    var deleted = await repo.ClearHistoryAsync(http.HttpContext.RequestAborted);
+    await PublishQueueAsync();
+    return Results.Json(new { ok = true, deleted });
+});
+
 app.MapPost("/api/queue/import", async (List<ImportEntryRequest> entries, HttpRequest http) =>
 {
     if (!HasLocalKey(http)) return ApiResults.Error("Clave local inválida.", StatusCodes.Status403Forbidden);

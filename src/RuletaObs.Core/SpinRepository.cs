@@ -258,6 +258,28 @@ VALUES($id,$event,$source,$vid,$login,$name,$avatar,$amount,$reward,$rewardTitle
         return System.Text.Json.JsonSerializer.Serialize(open, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
     }
 
+    public async Task<int> ClearHistoryAsync(CancellationToken cancellationToken = default)
+    {
+        await _gate.WaitAsync(cancellationToken);
+        try
+        {
+            using var connection = Open();
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = "DELETE FROM spin_entries WHERE status=$completed OR status=$cancelled;";
+                command.Parameters.AddWithValue("$completed", (int)SpinStatus.Completed);
+                command.Parameters.AddWithValue("$cancelled", (int)SpinStatus.Cancelled);
+                await command.ExecuteNonQueryAsync(cancellationToken);
+            }
+            using (var changes = connection.CreateCommand())
+            {
+                changes.CommandText = "SELECT changes();";
+                return Convert.ToInt32(await changes.ExecuteScalarAsync(cancellationToken));
+            }
+        }
+        finally { _gate.Release(); }
+    }
+
     public void BackupIfNeeded()
     {
         try
