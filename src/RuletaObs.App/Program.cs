@@ -372,15 +372,32 @@ app.MapGet("/api/events", async (HttpContext context, HttpRequest request) =>
 app.MapPost("/api/twitch/device/start", async (DeviceStartRequest request, HttpRequest http) =>
 {
     if (!HasLocalKey(http)) return ApiResults.Error("Clave local inválida.", StatusCodes.Status403Forbidden);
-    if (!string.IsNullOrWhiteSpace(request.ClientId) && request.ClientId.Trim() != config.Current.TwitchClientId)
-    {
-        config.Current.TwitchClientId = request.ClientId.Trim();
-        await config.SaveAsync(config.Current);
-    }
-    if (string.IsNullOrWhiteSpace(config.Current.TwitchClientId))
+
+    var requestedClientId = request.ClientId?.Trim();
+    var clientId = !string.IsNullOrWhiteSpace(requestedClientId)
+        ? requestedClientId
+        : config.Current.TwitchClientId;
+    if (string.IsNullOrWhiteSpace(clientId) && !string.IsNullOrWhiteSpace(BuiltInTwitchClientId.Value))
+        clientId = BuiltInTwitchClientId.Value.Trim();
+    if (string.IsNullOrWhiteSpace(clientId))
         return ApiResults.Error("Falta el Client ID público de Twitch. El desarrollador debe integrarlo o pegarlo en el campo avanzado.");
 
-    var session = await auth.StartDeviceFlowAsync(config.Current.TwitchClientId, http.HttpContext.RequestAborted);
+    DeviceCodeSession session;
+    try
+    {
+        session = await auth.StartDeviceFlowAsync(clientId, http.HttpContext.RequestAborted);
+    }
+    catch (Exception ex)
+    {
+        return ApiResults.Error(ex.Message);
+    }
+
+    if (!string.Equals(config.Current.TwitchClientId, clientId, StringComparison.Ordinal))
+    {
+        config.Current.TwitchClientId = clientId;
+        await config.SaveAsync(config.Current);
+    }
+
     authFlow.Pending = session;
     authFlow.LastError = null;
     if (!authFlow.IsPolling)

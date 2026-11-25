@@ -13,8 +13,10 @@
 
 <section class="card"><h2>1. Conectar Twitch</h2>
 <p class="muted">Pulsa conectar, inicia sesión en Twitch y autoriza. No necesitas entrar a Twitch Dev.</p>
-<label>Client ID público (solo si el desarrollador no lo integró)</label>
-<input id="clientId" placeholder="Client ID de la app pública de Twitch">
+<details style="margin-top:8px"><summary class="muted">Avanzado: Client ID</summary>
+<label>Solo cámbialo si el desarrollador no lo integró. Si ya conectaba antes, déjalo como está.</label>
+<input id="clientId" placeholder="Client ID de la app pública de Twitch" autocomplete="off">
+</details>
 <div class="row" style="margin-top:12px"><button id="connect">Conectar mi canal</button><button id="disconnect" class="danger">Desconectar</button></div>
 <p id="deviceHelp" class="warn"></p></section>
 

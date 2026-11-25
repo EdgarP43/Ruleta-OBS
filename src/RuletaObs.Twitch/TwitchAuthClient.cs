@@ -15,14 +15,19 @@ public sealed class TwitchAuthClient
 
     public async Task<DeviceCodeSession> StartDeviceFlowAsync(string clientId, CancellationToken cancellationToken = default)
     {
+        if (string.IsNullOrWhiteSpace(clientId))
+            throw new InvalidOperationException("Falta el Client ID público de Twitch.");
+
         var form = new FormUrlEncodedContent(new Dictionary<string, string>
         {
-            ["client_id"] = clientId,
+            ["client_id"] = clientId.Trim(),
             ["scopes"] = string.Join(" ", TwitchScopes.Required)
         });
         using var response = await _http.PostAsync("https://id.twitch.tv/oauth2/device", form, cancellationToken);
         var body = await response.Content.ReadAsStringAsync(cancellationToken);
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+            throw new InvalidOperationException(DescribeTwitchOAuthError(response.StatusCode, body));
+
         using var doc = JsonDocument.Parse(body);
         var r = doc.RootElement;
         return new DeviceCodeSession(
@@ -31,6 +36,30 @@ public sealed class TwitchAuthClient
             r.GetProperty("verification_uri").GetString()!,
             r.GetProperty("interval").GetInt32(),
             r.GetProperty("expires_in").GetInt32());
+    }
+
+    private static string DescribeTwitchOAuthError(System.Net.HttpStatusCode status, string body)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(body);
+            var root = doc.RootElement;
+            var message = root.TryGetProperty("message", out var m) ? m.GetString() : null;
+            var statusText = root.TryGetProperty("status", out var s) ? s.ToString() : null;
+            if (!string.IsNullOrWhiteSpace(message))
+            {
+                if (message.Contains("client", StringComparison.OrdinalIgnoreCase) ||
+                    message.Contains("invalid", StringComparison.OrdinalIgnoreCase))
+                    return "Twitch rechazó el Client ID. Déjalo vacío si ya viene integrado, o pega el Client ID público correcto.";
+                return $"Twitch: {message}";
+            }
+            if (!string.IsNullOrWhiteSpace(statusText)) return $"Twitch: {statusText}";
+        }
+        catch { /* body no JSON */ }
+
+        return status == System.Net.HttpStatusCode.Forbidden || (int)status == 403
+            ? "Twitch rechazó el Client ID. Revisa el campo avanzado o deja el valor integrado."
+            : $"Twitch respondió {(int)status} al iniciar la conexión.";
     }
 
     public async Task<TokenSet> ExchangeDeviceCodeAsync(string clientId, string deviceCode, CancellationToken cancellationToken = default)
