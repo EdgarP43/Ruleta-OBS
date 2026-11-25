@@ -6,7 +6,7 @@
 [Setup]
 AppId={{3B58B7B8-A0FA-4E6A-9E0C-52B145673C30}
 AppName={#AppName}
-AppVersion=0.1.0
+AppVersion=0.1.5
 DefaultDirName={localappdata}\Programs\RuletaObs
 DefaultGroupName={#AppName}
 DisableProgramGroupPage=yes

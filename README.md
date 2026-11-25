@@ -10,7 +10,17 @@ Todo corre desde un único `RuletaObs.exe` en la PC del creador: sin servidor en
 - [Descargar `RuletaObs.exe` portable](https://github.com/EdgarP43/Ruleta-OBS/releases/latest/download/RuletaObs.exe)
 - [Ver todas las versiones publicadas](https://github.com/EdgarP43/Ruleta-OBS/releases)
 
-Los ejecutables **no se guardan dentro del código del repositorio**: GitHub los publica como archivos adjuntos en **Releases**. Cada vez que se crea un tag `v*`, el pipeline compila automáticamente y adjunta `RuletaObs.exe` y `RuletaObs-Setup.exe` a esa versión. Si acabas de crear un tag, espera a que la acción **Release** termine en verde para ver los archivos.
+Los ejecutables **no se guardan dentro del código del repositorio**: se adjuntan a **Releases** de GitHub. La forma recomendada (rápida y sin gastar minutos/cuota de Actions) es publicar desde una PC Windows con .NET SDK 10 e Inno Setup 6:
+
+```powershell
+.\Publicar-Release.ps1 -Version 0.1.5
+gh auth login   # solo la primera vez
+git tag v0.1.5
+git push origin v0.1.5
+gh release create v0.1.5 .\artifacts\publish\RuletaObs.exe .\artifacts\installer\RuletaObs-Setup.exe --title "Ruleta OBS v0.1.5" --notes "Publicado desde PC local."
+```
+
+Opcional: el workflow `.github/workflows/release.yml` también puede generar la Release al subir un tag `v*`, si tienes cuota de Actions disponible.
 
 ## Para creadores: instalación en 3 minutos
 
@@ -79,13 +89,20 @@ $env:RULETA_URL = "http://127.0.0.1:47832"
 dotnet run --project src/RuletaObs.App
 ```
 
-### Publicar el .exe único
+### Publicar instalador y Release desde esta PC
+
+Requisitos: .NET SDK 10 e [Inno Setup 6](https://jrsoftware.org/isinfo.php).
 
 ```powershell
-dotnet publish src/RuletaObs.App/RuletaObs.App.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:DebugType=None -o artifacts/publish
+.\Publicar-Release.ps1 -Version 0.1.5
 ```
 
-El resultado es `artifacts/publish/RuletaObs.exe`. Para compilar el instalador necesitas Inno Setup 6 y ejecutar `ISCC.exe installer/RuletaObs.iss` después de publicar.
+Eso genera:
+
+- `artifacts/publish/RuletaObs.exe` (portable, self-contained)
+- `artifacts/installer/RuletaObs-Setup.exe` (instalador)
+
+Luego crea el tag y sube los archivos a GitHub Releases con `gh` (ver sección **Descargar**). No hace falta Actions para eso.
 
 ### App de Twitch del proyecto
 
@@ -102,10 +119,12 @@ Scopes solicitados: `channel:manage:redemptions`, `channel:read:redemptions` y `
 
 Para que el .exe oficial ya traiga el Client ID, define la variable de repositorio de GitHub Actions `TWITCH_CLIENT_ID`. Los workflows la inyectan al compilar. Sin esa variable, el asistente permite pegar el Client ID una vez (nunca pidas ni pegues contraseñas, códigos 2FA o Client Secrets de apps confidenciales).
 
-### Pipeline
+### Pipeline (opcional)
 
-- `.github/workflows/ci.yml`: en push/PR a `main`, compila, corre tests, publica el .exe y compila el instalador como artefacto.
-- `.github/workflows/release.yml`: al crear un tag `v*`, repite la verificación y adjunta `RuletaObs.exe` y `RuletaObs-Setup.exe` a la GitHub Release.
+- `.github/workflows/ci.yml`: en push/PR a `main`, compila y corre tests.
+- `.github/workflows/release.yml`: al crear un tag `v*`, puede publicar el `.exe` y el instalador a la Release (consume cuota de Actions/artifacts).
+
+Para releases oficiales se recomienda `Publicar-Release.ps1` + `gh release create` desde una PC.
 
 ### Consumo objetivo
 
