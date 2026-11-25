@@ -54,6 +54,8 @@ La información queda en `%AppData%\RuletaObs`:
 
 Si cambias de PC, puedes exportar la cola desde el panel e importarla desde la API local; copia además la carpeta completa si quieres conservar configuración.
 
+Para quitar la app de esta PC (instalador o portable), puedes usar `Desinstalar Ruleta OBS.bat` en la raíz del repo: cierra el proceso, ejecuta el desinstalador oficial si existe, limpia accesos y te pregunta si también borras `%AppData%\RuletaObs`.
+
 ## Recompensa existente vs. creada por la app
 
 Twitch solo permite completar (`FULFILLED`) o reembolsar (`CANCELED`) recompensas creadas por la misma aplicación que las administra.
